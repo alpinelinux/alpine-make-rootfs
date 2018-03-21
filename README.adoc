@@ -8,7 +8,11 @@ ifdef::env-github[]
 image:https://travis-ci.org/{gh-name}.svg?branch=master["Build Status", link="https://travis-ci.org/{gh-name}"]
 endif::env-github[]
 
-TODO
+This project provides a script for building customized https://alpinelinux.org/[Alpine Linux] rootfs (a base image if you like) for containers.
+It’s quite simple (250 LoC of shell), fast and requires minimum dependencies (just common Linux tools).
+
+TIP: Do you want to just quickly chroot into Alpine Linux, e.g. on CI?
+     Check out https://github.com/alpinelinux/alpine-chroot-install[alpine-chroot-install]!
 
 
 == Requirements
