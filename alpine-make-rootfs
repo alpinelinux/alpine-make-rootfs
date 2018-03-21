@@ -16,7 +16,9 @@
 #                                         - or "-" to dump TAR archive (w/o compression) to STDOUT.
 #
 #   <script>                              Path of script to execute after installing base system in
-#                                         the prepared rootfs and before clean-up.
+#                                         the prepared rootfs and before clean-up. Use "-" to read
+#                                         the script from STDIN; if it doesn't start with a shebang,
+#                                         "#!/bin/sh -e" is prepended.
 #
 #   <script-opts>                         Arguments to pass to the script.
 #
@@ -210,6 +212,23 @@ wgets() (
 		&& echo "$sha256  ${url##*/}" | sha256sum -c
 )
 
+# Writes STDIN into file $1 and sets it executable bit. If the content does not
+# start with a shebang, prepends "#!/bin/sh -e" before the first line.
+write_script() {
+	local filename="$1"
+
+	cat > "$filename.tmp"
+
+	if ! grep -q -m 1 '^#!' "$filename.tmp"; then
+		echo "#!/bin/sh -e" > "$filename"
+	fi
+
+	cat "$filename.tmp" >> "$filename"
+	rm "$filename.tmp"
+
+	chmod +x "$filename"
+}
+
 
 #=============================  M a i n  ==============================#
 
@@ -240,11 +259,9 @@ done
 [ $# -ne 0 ] || help 1 >&2
 
 ROOTFS_DEST="$1"; shift
-SCRIPT=
-[ $# -eq 0 ] || { SCRIPT=$(realpath "$1"); shift; }
+SCRIPT=${1:-}; shift
 
 [ "$(id -u)" -eq 0 ] || die 'This script must be run as root!'
-
 [ ! -e "${TEMP_DIR:-}" ] || die "Temp path $TEMP_DIR must not exist!"
 
 : ${ALPINE_BRANCH:="v3.7"}
@@ -272,6 +289,14 @@ if [ "$ROOTFS_DEST" = '-' ]; then
 elif [ "$tar_opts" ]; then
 	rootfs="${rootfs%.*}"
 	rootfs="${rootfs%.tar}"
+fi
+
+if [ "$SCRIPT" = '-' ]; then
+	SCRIPT="$TEMP_DIR/setup.sh"
+	write_script "$SCRIPT"
+fi
+if [ "$SCRIPT" ]; then
+	SCRIPT=$(realpath "$SCRIPT")
 fi
 
 if [ -f /etc/os-release ]; then
