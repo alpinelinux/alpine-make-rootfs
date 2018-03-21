@@ -45,6 +45,8 @@
 #
 #   -c --script-chroot (SCRIPT_CHROOT)    Bind <script>'s directory at /mnt inside the rootfs dir
 #                                         and chroot into the rootfs before executing <script>.
+#                                         Otherwise <script> is executed in the current directory
+#                                         and $ROOTFS variable points to the rootfs directory.
 #
 #   -d --temp-dir TEMP_DIR                Path where to create a temporary directory; used for
 #                                         downloading apk-tools when not available on the host
@@ -371,7 +373,7 @@ if [ "$SCRIPT" ]; then
 	if [ "$SCRIPT_CHROOT" = 'no' ]; then
 		einfo "Executing script: $script_name $*"
 
-		( cd "$rootfs" && "$SCRIPT" "$@" >&2 ) || die 'Script failed'
+		ROOTFS="$rootfs" "$SCRIPT" "$@" >&2 || die 'Script failed'
 	else
 		einfo "Executing script in chroot: $script_name $*"
 
