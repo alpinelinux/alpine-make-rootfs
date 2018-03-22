@@ -134,7 +134,7 @@ cleanup() {
 	set +eu
 	trap '' EXIT HUP INT TERM  # unset trap to avoid loop
 
-	if [ "$HOST_DISTRO" = alpine ]; then
+	if [ "$INSTALL_HOST_PKGS" = yes ]; then
 		_apk del $VIRTUAL_PKG >&2
 	fi
 	if [ -d "$TEMP_DIR" ]; then
@@ -301,16 +301,16 @@ if [ "$SCRIPT" ]; then
 	SCRIPT=$(realpath "$SCRIPT")
 fi
 
-if [ -f /etc/os-release ]; then
-	: ${HOST_DISTRO:="$(. /etc/os-release && echo "$ID")"}
+if [ -f /etc/alpine-release ]; then
+	: ${INSTALL_HOST_PKGS:="yes"}
 else
-	: ${HOST_DISTRO:="unknown"}
+	: ${INSTALL_HOST_PKGS:="no"}
 fi
 
 [ "$CLEANUP" = no ] || trap cleanup EXIT HUP INT TERM
 
 #-----------------------------------------------------------------------
-if [ "$HOST_DISTRO" = alpine ] && [ "$host_pkgs" ]; then
+if [ "$INSTALL_HOST_PKGS" = yes ] && [ "$host_pkgs" ]; then
 	einfo "Installing $host_pkgs on host system"
 	_apk add -t $VIRTUAL_PKG $host_pkgs >&2
 fi
