@@ -161,7 +161,7 @@ dump_alpine_keys() {
 		file=${line%%:*}
 		content=${line#*:}
 
-		printf "-----BEGIN PUBLIC KEY-----\n$content\n-----END PUBLIC KEY-----\n" \
+		printf -- "-----BEGIN PUBLIC KEY-----\n$content\n-----END PUBLIC KEY-----\n" \
 			> "$dest_dir/$file"
 	done
 }
