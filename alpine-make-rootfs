@@ -406,5 +406,10 @@ if [ "$tar_opts" ]; then
 	einfo 'Creating rootfs archive'
 
 	tar -C "$rootfs" $tar_opts --numeric-owner -f "$ROOTFS_DEST" .
+
+	if [ -f "$ROOTFS_DEST" ] && [ "${SUDO_UID:-}" ] && [ "${SUDO_GID:-}" ]; then
+		chown "$SUDO_UID:$SUDO_GID" "$ROOTFS_DEST"
+	fi
+
 	ls -la "$ROOTFS_DEST" >&2
 fi
