@@ -36,6 +36,40 @@ wget https://raw.githubusercontent.com/{gh-name}/v{version}/{script-name} \
     || exit 1
 
 
+== Examples
+
+=== Installation Script in Heredoc
+
+[source, sh]
+----
+sudo ./alpine-make-rootfs \  # <1>
+    --branch v3.7 \  # <2>
+    --packages 'ruby ruby-bigdecimal sqlite' \  # <3>
+    --timezone 'Europe/Prague' \  # <4>
+    --script-chroot \  # <5>
+    example-$(date +%Y%m%d).tar.gz <<'SHELL'  # <6>
+        # Copy some file from the repository root to the rootfs.
+        install -D -m 755 examples/hello_world.rb /app/hello_world.rb
+
+        # Install some dev packages and gem mailcatcher.
+        apk add --no-progress -t .make build-base ruby-dev sqlite-dev
+        gem install --no-document mailcatcher
+
+        # Clean-up dev packages.  <7>
+        apk del --no-progress .make
+SHELL
+----
+<1> The script needs to create files owned by _root_ or other users and optionally uses chroot (when `--script-chroot` is specified), so it must be run under _root_ (e.g. using `sudo`).
+<2> Alpine branch (release) to install (see https://wiki.alpinelinux.org/wiki/Alpine_Linux:Releases[Alpine Releases]).
+<3> You can name packages to install into the chroot, in addition to base packages (see `ALPINE_BASE_PKGS` in link:{script-name}[{script-name}]).
+<4> You may specify timezone to set (default is UTC).
+<5> This flag tells that the installation script will be executed inside chroot with the rootfs as new root.
+    Your current working directory is binded at `/mnt` inside the chroot and `$PWD` for the script is set to `/mnt`, so you can easily access files out of the chroot and copy them into the rootfs.
+<6> Installation script may be provided also via STDIN, using a convenient heredoc syntax.
+    The script passed is executed using `/bin/sh -e`.
+<7> Note that it’s not needed to clean `apk` cache, this is done automatically.
+
+
 == License
 
 This project is licensed under http://opensource.org/licenses/MIT/[MIT License].
