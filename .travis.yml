@@ -6,7 +6,7 @@ script:
         --branch v3.7
         --packages 'ruby ruby-bigdecimal sqlite'
         --script-chroot
-        example-$(date +%Y%m%d).tar.xz -- ./example/install.sh
+        example-$(date +%Y%m%d).tar.gz -- ./example/install.sh
 #deploy:
 #  provider: releases
 #  api_key:
