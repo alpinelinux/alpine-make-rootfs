@@ -1,7 +1,7 @@
 = Make Alpine Linux RootFS
 :script-name: alpine-make-rootfs
 :script-sha1: 714a764b96442f551084fc50941fd1352e15ca6d
-:gh-name: jirutka/{script-name}
+:gh-name: alpinelinux/{script-name}
 :version: 0.1.0
 
 ifdef::env-github[]
