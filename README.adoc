@@ -43,7 +43,7 @@ wget https://raw.githubusercontent.com/{gh-name}/v{version}/{script-name} \
 [source, sh]
 ----
 sudo ./alpine-make-rootfs \  # <1>
-    --branch v3.7 \  # <2>
+    --branch v3.8 \  # <2>
     --packages 'ruby ruby-bigdecimal sqlite' \  # <3>
     --timezone 'Europe/Prague' \  # <4>
     --script-chroot \  # <5>
