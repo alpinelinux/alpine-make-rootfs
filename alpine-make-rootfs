@@ -166,14 +166,21 @@ dump_alpine_keys() {
 	done
 }
 
+# Binds the directory $1 at the mountpoint $2 and sets propagation to private.
+mount_bind() {
+	mkdir -p "$2"
+	mount --bind "$1" "$2"
+	mount --make-private "$2"
+}
+
 # Prepares chroot at the specified path.
 prepare_chroot() {
 	local dest="$1"
 
-	mkdir -p "$dest"/proc "$dest"/dev "$dest"/sys
+	mkdir -p "$dest"/proc
 	mount -t proc none "$dest"/proc
-	mount --bind /dev "$dest"/dev
-	mount --bind /sys "$dest"/sys
+	mount_bind /dev "$dest"/dev
+	mount_bind /sys "$dest"/sys
 
 	install -D -m 644 /etc/resolv.conf "$dest"/etc/resolv.conf
 }
@@ -378,7 +385,7 @@ if [ "$SCRIPT" ]; then
 		einfo "Executing script in chroot: $script_name $*"
 
 		prepare_chroot "$rootfs"
-		mount --bind "${SCRIPT%/*}" "$rootfs"/mnt
+		mount_bind "${SCRIPT%/*}" "$rootfs"/mnt
 		chroot "$rootfs" \
 			sh -c "cd /mnt && ./$script_name \"\$@\"" -- "$@" >&2 \
 			|| die 'Script failed'
