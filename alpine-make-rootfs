@@ -95,6 +95,8 @@ readonly FUTILE_DIRS='
 	/home /media/cdrom /media/floppy /media/usb /mnt /srv /usr/local/bin
 	/usr/local/lib /usr/local/share
 '
+# An opaque string used to detect changes in resolv.conf.
+readonly RESOLVCONF_MARK="### created by $PROGNAME ###"
 # Name used as a "virtual package" for temporarily installed packages.
 readonly VIRTUAL_PKG=".make-$PROGNAME"
 
@@ -183,6 +185,7 @@ prepare_chroot() {
 	mount_bind /sys "$dest"/sys
 
 	install -D -m 644 /etc/resolv.conf "$dest"/etc/resolv.conf
+	echo "$RESOLVCONF_MARK" >> "$dest"/etc/resolv.conf
 }
 
 # Sets up timezone $1 in Alpine rootfs.
@@ -398,7 +401,10 @@ einfo 'Cleaning-up rootfs'
 
 _apk del --root "$rootfs" --purge "$VIRTUAL_PKG" >&2
 
-rm -Rf "$rootfs"/var/cache/apk "$rootfs"/etc/resolv.conf
+if grep -qw "$RESOLVCONF_MARK" "$rootfs"/etc/resolv.conf 2>/dev/null; then
+	rm "$rootfs"/etc/resolv.conf
+fi
+rm -Rf "$rootfs"/var/cache/apk
 rm -Rf "$rootfs"/dev/*
 
 [ -f "$rootfs"/sbin/apk ] \
