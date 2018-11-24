@@ -1,7 +1,8 @@
 #!/bin/sh
+set -eu
 
-# Copy some file from the repository root to the rootfs.
-install -D -m 755 example/hello_world.rb /app/hello_world.rb
+# Copy some file from this script's directory to the rootfs.
+install -D -m 755 hello_world.rb /app/hello_world.rb
 
 # Install some dev packages and gem mailcatcher.
 apk add --no-progress -t .make build-base ruby-dev sqlite-dev
