@@ -70,6 +70,16 @@ SHELL
 <7> Note that it’s not needed to clean `apk` cache, this is done automatically.
 
 
+=== Create Docker Base Image
+
+Create your own (customized) up-to-date base image.
+
+[source, sh]
+----
+sudo ./alpine-make-rootfs --branch v3.8 - | docker import -c 'CMD /bin/sh' - my/alpine:3.8
+----
+
+
 == License
 
 This project is licensed under http://opensource.org/licenses/MIT/[MIT License].
