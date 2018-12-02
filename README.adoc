@@ -47,7 +47,7 @@ sudo ./alpine-make-rootfs \  # <1>
     --packages 'ruby ruby-bigdecimal sqlite' \  # <3>
     --timezone 'Europe/Prague' \  # <4>
     --script-chroot \  # <5>
-    example-$(date +%Y%m%d).tar.gz <<'SHELL'  # <6>
+    example-$(date +%Y%m%d).tar.gz - <<'SHELL'  # <6>
         # Copy some file from the repository root to the rootfs.
         install -D -m 755 examples/hello_world.rb /app/hello_world.rb
 
