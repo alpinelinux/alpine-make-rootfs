@@ -80,6 +80,17 @@ sudo ./alpine-make-rootfs --branch v3.8 - | docker import -c 'CMD /bin/sh' - my/
 ----
 
 
+=== Create OCI Image
+
+You can use simply shell script https://github.com/jirutka/sloci-image/[sloci-image] to pack the generated rootfs as a single-layer OCI image.
+
+[source, sh]
+----
+sudo ./alpine-make-rootfs --branch v3.8 --script-chroot rootfs.tar.gz ./install.sh
+./sloci-image --entrypoint /start.sh --port 80/tcp --tar rootfs.tar.gz alpine:3.8
+----
+
+
 == License
 
 This project is licensed under http://opensource.org/licenses/MIT/[MIT License].
