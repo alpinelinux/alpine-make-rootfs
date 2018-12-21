@@ -188,6 +188,14 @@ prepare_chroot() {
 	echo "$RESOLVCONF_MARK" >> "$dest"/etc/resolv.conf
 }
 
+umount_chroot() {
+	local dest="$1"
+
+	umount "$dest"/proc
+	umount "$dest"/dev
+	umount "$dest"/sys
+}
+
 # Sets up timezone $1 in Alpine rootfs.
 setup_timezone() {
 	local timezone="$1"
@@ -392,7 +400,7 @@ if [ "$SCRIPT" ]; then
 		chroot "$rootfs" \
 			sh -c "cd /mnt && ./$script_name \"\$@\"" -- "$@" >&2 \
 			|| die 'Script failed'
-		umount_recursively "$rootfs"
+		umount_chroot "$rootfs"
 	fi
 fi
 
