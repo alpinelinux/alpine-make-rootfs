@@ -24,7 +24,7 @@
 #
 # Options and Environment Variables:
 #   -b --branch ALPINE_BRANCH             Alpine branch to install; used only when
-#                                         --repositories-file is not specified. Default is v3.8.
+#                                         --repositories-file is not specified. Default is v3.9.
 #
 #      --keys-dir KEYS_DIR                Path of directory with Alpine keys to copy into
 #                                         the rootfs. Default is /etc/apk/keys. If does not exist,
@@ -276,7 +276,7 @@ SCRIPT=${1:-}; shift
 [ "$(id -u)" -eq 0 ] || die 'This script must be run as root!'
 [ ! -e "${TEMP_DIR:-}" ] || die "Temp path $TEMP_DIR must not exist!"
 
-: ${ALPINE_BRANCH:="v3.8"}
+: ${ALPINE_BRANCH:="v3.9"}
 : ${ALPINE_MIRROR:="https://nl.alpinelinux.org/alpine"}
 : ${CLEANUP:="yes"}
 : ${KEYS_DIR:="/etc/apk/keys"}
