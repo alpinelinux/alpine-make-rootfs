@@ -2,7 +2,7 @@ sudo: required
 language: minimal
 script:
   - sudo ./alpine-make-rootfs
-        --branch v3.8
+        --branch v3.9
         --packages 'ruby ruby-bigdecimal sqlite'
         --script-chroot
         example-$(date +%Y%m%d).tar.gz -- ./example/install.sh
