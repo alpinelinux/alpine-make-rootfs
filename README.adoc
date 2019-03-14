@@ -1,8 +1,8 @@
 = Make Alpine Linux RootFS
 :script-name: alpine-make-rootfs
-:script-sha1: f290d9f09395b107e570dbe2eb1c5bad98db1cbb
+:script-sha1: ec35a0c54f068cd84044d0eb6ba5d558f0420a23
 :gh-name: alpinelinux/{script-name}
-:version: 0.2.0
+:version: 0.3.0
 
 ifdef::env-github[]
 image:https://travis-ci.org/{gh-name}.svg?branch=master["Build Status", link="https://travis-ci.org/{gh-name}"]
