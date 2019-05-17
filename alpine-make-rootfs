@@ -405,11 +405,14 @@ _apk del --root "$rootfs" --purge "$VIRTUAL_PKG" >&2
 if grep -qw "$RESOLVCONF_MARK" "$rootfs"/etc/resolv.conf 2>/dev/null; then
 	rm "$rootfs"/etc/resolv.conf
 fi
-rm -Rf "$rootfs"/var/cache/apk
+
 rm -Rf "$rootfs"/dev/*
 
-[ -f "$rootfs"/sbin/apk ] \
-	|| rm -Rf "$rootfs"/etc/apk "$rootfs"/lib/apk
+if [ -f "$rootfs"/sbin/apk ]; then
+	rm -Rf "$rootfs"/var/cache/apk/*
+else
+	rm -Rf "$rootfs"/etc/apk "$rootfs"/lib/apk "$rootfs"/var/cache/apk
+fi
 
 for dir in $FUTILE_DIRS; do
 	rmdir -p "$rootfs$dir" 2>/dev/null || true
