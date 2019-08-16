@@ -208,7 +208,7 @@ umount_recursively() {
 
 	cat /proc/mounts \
 		| cut -d ' ' -f 2 \
-		| { grep "^$mount_point" || true; } \
+		| { grep "^$mount_point/" || true; } \
 		| sort -r \
 		| xargs -r -n 1 umount
 }
