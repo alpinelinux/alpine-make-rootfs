@@ -271,7 +271,8 @@ done
 [ $# -ne 0 ] || help 1 >&2
 
 ROOTFS_DEST="$1"; shift
-SCRIPT=${1:-}; shift || true
+SCRIPT=
+[ $# -eq 0 ] || { SCRIPT="$1"; shift; }
 
 [ "$(id -u)" -eq 0 ] || die 'This script must be run as root!'
 [ ! -e "${TEMP_DIR:-}" ] || die "Temp path $TEMP_DIR must not exist!"
