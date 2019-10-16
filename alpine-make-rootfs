@@ -36,6 +36,11 @@
 #
 #   -C --no-cleanup (CLEANUP)             Don't umount and remove temporary directories when done.
 #
+#      --no-default-pkgs (DEFAULT_PKGS)   Don't install the default base packages (alpine-baselayout
+#                                         busybox busybox-suid musl-utils), i.e. only the packages
+#                                         specified in --packages will be installed. Use only if
+#                                         you know what are you doing!
+#
 #   -p --packages PACKAGES                Additional packages to install into the rootfs.
 #
 #   -r --repositories-file REPOS_FILE     Path of repositories file to copy into the rootfs.
@@ -245,7 +250,7 @@ write_script() {
 #=============================  M a i n  ==============================#
 
 opts=$(getopt -n $PROGNAME -o b:m:Cp:r:cd:t:hV \
-	-l branch:,keys-dir:,mirror-uri:,no-cleanup,packages:,repositories-file:,script-chroot,temp-dir:,timezone:,help,version \
+	-l branch:,keys-dir:,mirror-uri:,no-cleanup,no-default-pkgs,packages:,repositories-file:,script-chroot,temp-dir:,timezone:,help,version \
 	-- "$@") || help 1 >&2
 
 eval set -- "$opts"
@@ -256,6 +261,7 @@ while [ $# -gt 0 ]; do
 		     --keys-dir) KEYS_DIR="$2";;
 		-m | --mirror-uri) ALPINE_MIRROR="$2";;
 		-C | --no-cleanup) CLEANUP='no'; n=1;;
+		     --no-default-pkgs) DEFAULT_PKGS='no'; n=1;;
 		-p | --packages) PACKAGES="${PACKAGES:-} $2";;
 		-r | --repositories-file) REPOS_FILE="$2";;
 		-c | --script-chroot) SCRIPT_CHROOT='yes'; n=1;;
@@ -280,6 +286,7 @@ SCRIPT=
 : ${ALPINE_BRANCH:="v3.10"}
 : ${ALPINE_MIRROR:="https://nl.alpinelinux.org/alpine"}
 : ${CLEANUP:="yes"}
+: ${DEFAULT_PKGS:="yes"}
 : ${KEYS_DIR:="/etc/apk/keys"}
 : ${PACKAGES:=}
 : ${REPOS_FILE:="/etc/apk/repositories"}
@@ -295,6 +302,12 @@ case "$ROOTFS_DEST" in
 	*.tar | -) tar_opts='-c';;
 	*) tar_opts='';;
 esac
+
+rootfs_pkgs="$PACKAGES"
+if [ "$DEFAULT_PKGS" = 'yes' ]; then
+	rootfs_pkgs="$ALPINE_BASE_PKGS $rootfs_pkgs"
+fi
+[ "$rootfs_pkgs" ] || die 'No packages specified to be installed!'
 
 rootfs="$ROOTFS_DEST"
 if [ "$ROOTFS_DEST" = '-' ]; then
@@ -336,7 +349,7 @@ if ! command -v "$APK" >/dev/null; then
 fi
 
 #-----------------------------------------------------------------------
-einfo 'Installing base system'
+einfo 'Installing system'
 
 mkdir -p "$rootfs"/etc/apk/keys
 
@@ -355,26 +368,23 @@ else
 	dump_alpine_keys "$rootfs"/etc/apk/keys/
 fi
 
-_apk add --root "$rootfs" --update-cache --initdb $ALPINE_BASE_PKGS >&2
+_apk add --root "$rootfs" --update-cache --initdb $rootfs_pkgs >&2
 
-# This package contains /etc/os-release, /etc/alpine-release and /etc/issue,
-# but we don't wanna install all its dependencies (e.g. openrc).
-_apk fetch --root "$rootfs" --stdout alpine-base \
-	| tar -xz -C "$rootfs" etc >&2
-ln -sf /run "$rootfs"/var/run
+if ! _apk info --root "$rootfs" --quiet --installed alpine-base; then
+	# This package contains /etc/os-release, /etc/alpine-release and /etc/issue,
+	# but we don't wanna install all its dependencies (e.g. openrc).
+	_apk fetch --root "$rootfs" --stdout alpine-base \
+		| tar -xz -C "$rootfs" etc >&2
+fi
 
 _apk add --root "$rootfs" -t "$VIRTUAL_PKG" apk-tools >&2
+
+ln -sf /run "$rootfs"/var/run
 
 #-----------------------------------------------------------------------
 if [ "$TIMEZONE" ]; then
 	einfo "Setting timezone $TIMEZONE"
 	setup_timezone "$TIMEZONE" "$rootfs" >&2
-fi
-
-#-----------------------------------------------------------------------
-if [ "$PACKAGES" ]; then
-	einfo 'Installing additional packages'
-	_apk add --root "$rootfs" $PACKAGES >&2
 fi
 
 #-----------------------------------------------------------------------
