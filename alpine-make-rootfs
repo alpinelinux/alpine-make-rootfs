@@ -377,8 +377,6 @@ if ! _apk info --root "$rootfs" --quiet --installed alpine-base; then
 		| tar -xz -C "$rootfs" etc >&2
 fi
 
-_apk add --root "$rootfs" -t "$VIRTUAL_PKG" apk-tools >&2
-
 ln -sf /run "$rootfs"/var/run
 
 #-----------------------------------------------------------------------
@@ -390,6 +388,8 @@ fi
 #-----------------------------------------------------------------------
 if [ "$SCRIPT" ]; then
 	script_name="${SCRIPT##*/}"
+
+	_apk add --root "$rootfs" -t "$VIRTUAL_PKG" apk-tools >&2
 
 	if [ "$SCRIPT_CHROOT" = 'no' ]; then
 		einfo "Executing script: $script_name $*"
@@ -410,7 +410,9 @@ fi
 #-----------------------------------------------------------------------
 einfo 'Cleaning-up rootfs'
 
-_apk del --root "$rootfs" --purge "$VIRTUAL_PKG" >&2
+if _apk info --root "$rootfs" --quiet --installed "$VIRTUAL_PKG"; then
+	_apk del --root "$rootfs" --purge "$VIRTUAL_PKG" >&2
+fi
 
 if grep -qw "$RESOLVCONF_MARK" "$rootfs"/etc/resolv.conf 2>/dev/null; then
 	rm "$rootfs"/etc/resolv.conf
