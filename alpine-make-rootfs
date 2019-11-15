@@ -389,14 +389,14 @@ fi
 if [ "$SCRIPT" ]; then
 	script_name="${SCRIPT##*/}"
 
-	_apk add --root "$rootfs" -t "$VIRTUAL_PKG" apk-tools >&2
-
 	if [ "$SCRIPT_CHROOT" = 'no' ]; then
 		einfo "Executing script: $script_name $*"
 
 		ROOTFS="$rootfs" "$SCRIPT" "$@" >&2 || die 'Script failed'
 	else
 		einfo "Executing script in chroot: $script_name $*"
+
+		_apk add --root "$rootfs" -t "$VIRTUAL_PKG" apk-tools >&2
 
 		prepare_chroot "$rootfs"
 		mount_bind "${SCRIPT%/*}" "$rootfs"/mnt
