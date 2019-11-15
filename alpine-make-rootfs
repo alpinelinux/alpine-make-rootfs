@@ -26,6 +26,12 @@
 #   -b --branch ALPINE_BRANCH             Alpine branch to install; used only when
 #                                         --repositories-file is not specified. Default is v3.10.
 #
+#   -s --fs-skel-dir FS_SKEL_DIR          Path of directory which content to recursively copy
+#                                         (using rsync) into / of the rootfs.
+#
+#      --fs-skel-chown FS_SKEL_CHOWN      Force all files from FS_SKEL_DIR to be owned by the
+#                                         specified USER:GROUP.
+#
 #      --keys-dir KEYS_DIR                Path of directory with Alpine keys to copy into
 #                                         the rootfs. Default is /etc/apk/keys. If does not exist,
 #                                         keys for x86_64 embedded in this script will be used.
@@ -249,8 +255,8 @@ write_script() {
 
 #=============================  M a i n  ==============================#
 
-opts=$(getopt -n $PROGNAME -o b:m:Cp:r:cd:t:hV \
-	-l branch:,keys-dir:,mirror-uri:,no-cleanup,no-default-pkgs,packages:,repositories-file:,script-chroot,temp-dir:,timezone:,help,version \
+opts=$(getopt -n $PROGNAME -o b:m:Cp:r:s:cd:t:hV \
+	-l branch:,fs-skel-chown:,fs-skel-dir:,keys-dir:,mirror-uri:,no-cleanup,no-default-pkgs,packages:,repositories-file:,script-chroot,temp-dir:,timezone:,help,version \
 	-- "$@") || help 1 >&2
 
 eval set -- "$opts"
@@ -258,6 +264,8 @@ while [ $# -gt 0 ]; do
 	n=2
 	case "$1" in
 		-b | --branch) ALPINE_BRANCH="$2";;
+		-s | --fs-skel-dir) FS_SKEL_DIR="$2";;
+		     --fs-skel-chown) FS_SKEL_CHOWN="$2";;
 		     --keys-dir) KEYS_DIR="$2";;
 		-m | --mirror-uri) ALPINE_MIRROR="$2";;
 		-C | --no-cleanup) CLEANUP='no'; n=1;;
@@ -287,6 +295,8 @@ SCRIPT=
 : ${ALPINE_MIRROR:="https://nl.alpinelinux.org/alpine"}
 : ${CLEANUP:="yes"}
 : ${DEFAULT_PKGS:="yes"}
+: ${FS_SKEL_CHOWN:=}
+: ${FS_SKEL_DIR:=}
 : ${KEYS_DIR:="/etc/apk/keys"}
 : ${PACKAGES:=}
 : ${REPOS_FILE:="/etc/apk/repositories"}
@@ -302,6 +312,7 @@ case "$ROOTFS_DEST" in
 	*.tar | -) tar_opts='-c';;
 	*) tar_opts='';;
 esac
+[ -z "$FS_SKEL_DIR" ] || host_pkgs="$host_pkgs rsync"
 
 rootfs_pkgs="$PACKAGES"
 if [ "$DEFAULT_PKGS" = 'yes' ]; then
@@ -383,6 +394,19 @@ ln -sf /run "$rootfs"/var/run
 if [ "$TIMEZONE" ]; then
 	einfo "Setting timezone $TIMEZONE"
 	setup_timezone "$TIMEZONE" "$rootfs" >&2
+fi
+
+#-----------------------------------------------------------------------
+if [ "$FS_SKEL_DIR" ]; then
+	einfo "Copying content of $FS_SKEL_DIR into rootfs"
+
+	[ "$FS_SKEL_CHOWN" ] \
+		&& rsync_opts="--chown $FS_SKEL_CHOWN" \
+		|| rsync_opts='--numeric-ids'
+	rsync --archive --info=NAME2 --whole-file $rsync_opts "$FS_SKEL_DIR"/ "$rootfs"/ >&2
+
+	# rsync may modify perms of the rootfs dir itself, so make sure it's correct.
+	install -d -m 0755 -o root -g root "$rootfs"
 fi
 
 #-----------------------------------------------------------------------
