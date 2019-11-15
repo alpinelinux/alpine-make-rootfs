@@ -96,7 +96,7 @@ alpine-devel@lists.alpinelinux.org-4a6a0840.rsa.pub:MIIBIjANBgkqhkiG9w0BAQEFAAOC
 alpine-devel@lists.alpinelinux.org-5261cecb.rsa.pub:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwlzMkl7b5PBdfMzGdCT0\ncGloRr5xGgVmsdq5EtJvFkFAiN8Ac9MCFy/vAFmS8/7ZaGOXoCDWbYVLTLOO2qtX\nyHRl+7fJVh2N6qrDDFPmdgCi8NaE+3rITWXGrrQ1spJ0B6HIzTDNEjRKnD4xyg4j\ng01FMcJTU6E+V2JBY45CKN9dWr1JDM/nei/Pf0byBJlMp/mSSfjodykmz4Oe13xB\nCa1WTwgFykKYthoLGYrmo+LKIGpMoeEbY1kuUe04UiDe47l6Oggwnl+8XD1MeRWY\nsWgj8sF4dTcSfCMavK4zHRFFQbGp/YFJ/Ww6U9lA3Vq0wyEI6MCMQnoSMFwrbgZw\nwwIDAQAB
 '
 # List of directories to remove when empty.
-readonly FUTILE_DIRS='
+readonly UNNECESSARY_DIRS='
 	/home /media/cdrom /media/floppy /media/usb /mnt /srv /usr/local/bin
 	/usr/local/lib /usr/local/share
 '
@@ -426,7 +426,7 @@ else
 	rm -Rf "$rootfs"/etc/apk "$rootfs"/lib/apk "$rootfs"/var/cache/apk
 fi
 
-for dir in $FUTILE_DIRS; do
+for dir in $UNNECESSARY_DIRS; do
 	rmdir -p "$rootfs$dir" 2>/dev/null || true
 done
 
