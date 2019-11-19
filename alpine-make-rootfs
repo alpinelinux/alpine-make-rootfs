@@ -304,6 +304,10 @@ SCRIPT=
 : ${TEMP_DIR:="$(mktemp -d /tmp/$PROGNAME.XXXXXX)"}
 : ${TIMEZONE:=}
 
+case "$ALPINE_BRANCH" in
+	[0-9]*) ALPINE_BRANCH="v$ALPINE_BRANCH";;
+esac
+
 host_pkgs=''
 case "$ROOTFS_DEST" in
 	*.tar.bz2 | *.tbz) tar_opts='-cj';;
