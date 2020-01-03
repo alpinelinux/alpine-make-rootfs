@@ -392,8 +392,6 @@ if ! _apk info --root "$rootfs" --quiet --installed alpine-base; then
 		| tar -xz -C "$rootfs" etc >&2
 fi
 
-ln -sf /run "$rootfs"/var/run
-
 #-----------------------------------------------------------------------
 if [ "$TIMEZONE" ]; then
 	einfo "Setting timezone $TIMEZONE"
