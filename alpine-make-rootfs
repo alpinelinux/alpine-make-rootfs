@@ -429,7 +429,7 @@ if [ "$SCRIPT" ]; then
 		prepare_chroot "$rootfs"
 		mount_bind "${SCRIPT%/*}" "$rootfs"/mnt
 		chroot "$rootfs" \
-			sh -c "cd /mnt && ./$script_name \"\$@\"" -- "$@" >&2 \
+			/bin/sh -c "cd /mnt && ./$script_name \"\$@\"" -- "$@" >&2 \
 			|| die 'Script failed'
 		umount_recursively "$rootfs"
 	fi
