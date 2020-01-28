@@ -24,7 +24,8 @@
 #
 # Options and Environment Variables:
 #   -b --branch ALPINE_BRANCH             Alpine branch to install; used only when
-#                                         --repositories-file is not specified. Default is v3.10.
+#                                         --repositories-file is not specified. Default is
+#                                         latest-stable.
 #
 #   -s --fs-skel-dir FS_SKEL_DIR          Path of directory which content to recursively copy
 #                                         (using rsync) into / of the rootfs.
@@ -291,7 +292,7 @@ SCRIPT=
 [ "$(id -u)" -eq 0 ] || die 'This script must be run as root!'
 [ ! -e "${TEMP_DIR:-}" ] || die "Temp path $TEMP_DIR must not exist!"
 
-: ${ALPINE_BRANCH:="v3.10"}
+: ${ALPINE_BRANCH:="latest-stable"}
 : ${ALPINE_MIRROR:="https://nl.alpinelinux.org/alpine"}
 : ${CLEANUP:="yes"}
 : ${DEFAULT_PKGS:="yes"}
