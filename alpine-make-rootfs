@@ -39,7 +39,7 @@
 #
 #   -m --mirror-uri ALPINE_MIRROR         URI of the Aports mirror to fetch packages; used only
 #                                         when --repositories-file is not specified. Default is
-#                                         https://nl.alpinelinux.org/alpine.
+#                                         http://dl-cdn.alpinelinux.org/alpine.
 #
 #   -C --no-cleanup (CLEANUP)             Don't umount and remove temporary directories when done.
 #
@@ -294,7 +294,7 @@ SCRIPT=
 [ ! -e "${TEMP_DIR:-}" ] || die "Temp path $TEMP_DIR must not exist!"
 
 : ${ALPINE_BRANCH:="latest-stable"}
-: ${ALPINE_MIRROR:="https://nl.alpinelinux.org/alpine"}
+: ${ALPINE_MIRROR:="http://dl-cdn.alpinelinux.org/alpine"}
 : ${CLEANUP:="yes"}
 : ${DEFAULT_PKGS:="yes"}
 : ${FS_SKEL_CHOWN:=}
