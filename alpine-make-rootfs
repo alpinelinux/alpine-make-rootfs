@@ -77,9 +77,9 @@
 #   APK_OPTS                              Options to pass into apk on each execution.
 #                                         Default is "--no-progress".
 #
-#   APK_TOOLS_URI                         URL of static apk-tools tarball to download if $APK is
-#                                         not found on the host system. Default is x86_64 apk-tools
-#                                         from https://github.com/alpinelinux/apk-tools/releases.
+#   APK_TOOLS_URI                         URL of apk-tools binary to download if $APK is not found
+#                                         on the host system. Default is x86_64 apk.static from
+#                                         https://gitlab.alpinelinux.org/alpine/apk-tools/-/packages.
 #
 #   APK_TOOLS_SHA256                      SHA-256 checksum of $APK_TOOLS_URI.
 #
@@ -115,8 +115,8 @@ readonly VIRTUAL_PKG=".make-$PROGNAME"
 
 : ${APK:="apk"}
 : ${APK_OPTS:="--no-progress"}
-: ${APK_TOOLS_URI:="https://github.com/alpinelinux/apk-tools/releases/download/v2.10.4/apk-tools-2.10.4-x86_64-linux.tar.gz"}
-: ${APK_TOOLS_SHA256:="efe948160317fe78058e207554d0d9195a3dfcc35f77df278d30448d7b3eb892"}
+: ${APK_TOOLS_URI:="https://gitlab.alpinelinux.org/api/v4/projects/5/packages/generic/v2.12.9/x86_64/apk.static"}
+: ${APK_TOOLS_SHA256:="5176da3d4c41f12a08b82809aca8e7e2e383b7930979651b8958eca219815af5"}
 
 
 # Set pipefail if supported.
@@ -361,8 +361,8 @@ if ! command -v "$APK" >/dev/null; then
 	einfo "$APK not found, downloading static apk-tools"
 
 	wgets "$APK_TOOLS_URI" "$APK_TOOLS_SHA256" "$TEMP_DIR"
-	tar -C "$TEMP_DIR" -xzf "$TEMP_DIR/${APK_TOOLS_URI##*/}"
-	APK="$(ls "$TEMP_DIR"/apk-tools-*/apk)"
+	APK="$TEMP_DIR/apk.static"
+	chmod +x "$APK"
 fi
 
 #-----------------------------------------------------------------------
