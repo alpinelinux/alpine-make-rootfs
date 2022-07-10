@@ -23,6 +23,7 @@
 #   <script-opts>                         Arguments to pass to the script.
 #
 # Options and Environment Variables:
+#   -a --arch ALPINE_ARCH                 Processor architecture, either x86_64 or aarch64
 #   -b --branch ALPINE_BRANCH             Alpine branch to install; used only when
 #                                         --repositories-file is not specified. Default is
 #                                         latest-stable.
@@ -98,10 +99,15 @@ readonly VERSION='0.6.0'
 readonly ALPINE_BASE_PKGS='alpine-baselayout busybox busybox-suid musl-utils'
 
 # Alpine APK keys for verification of packages for x86_64.
-readonly ALPINE_KEYS='
+readonly ALPINE_KEYS_X86_64='
 alpine-devel@lists.alpinelinux.org-4a6a0840.rsa.pub:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1yHJxQgsHQREclQu4Ohe\nqxTxd1tHcNnvnQTu/UrTky8wWvgXT+jpveroeWWnzmsYlDI93eLI2ORakxb3gA2O\nQ0Ry4ws8vhaxLQGC74uQR5+/yYrLuTKydFzuPaS1dK19qJPXB8GMdmFOijnXX4SA\njixuHLe1WW7kZVtjL7nufvpXkWBGjsfrvskdNA/5MfxAeBbqPgaq0QMEfxMAn6/R\nL5kNepi/Vr4S39Xvf2DzWkTLEK8pcnjNkt9/aafhWqFVW7m3HCAII6h/qlQNQKSo\nGuH34Q8GsFG30izUENV9avY7hSLq7nggsvknlNBZtFUcmGoQrtx3FmyYsIC8/R+B\nywIDAQAB
 alpine-devel@lists.alpinelinux.org-5261cecb.rsa.pub:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwlzMkl7b5PBdfMzGdCT0\ncGloRr5xGgVmsdq5EtJvFkFAiN8Ac9MCFy/vAFmS8/7ZaGOXoCDWbYVLTLOO2qtX\nyHRl+7fJVh2N6qrDDFPmdgCi8NaE+3rITWXGrrQ1spJ0B6HIzTDNEjRKnD4xyg4j\ng01FMcJTU6E+V2JBY45CKN9dWr1JDM/nei/Pf0byBJlMp/mSSfjodykmz4Oe13xB\nCa1WTwgFykKYthoLGYrmo+LKIGpMoeEbY1kuUe04UiDe47l6Oggwnl+8XD1MeRWY\nsWgj8sF4dTcSfCMavK4zHRFFQbGp/YFJ/Ww6U9lA3Vq0wyEI6MCMQnoSMFwrbgZw\nwwIDAQAB
 alpine-devel@lists.alpinelinux.org-6165ee59.rsa.pub:MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAutQkua2CAig4VFSJ7v54\nALyu/J1WB3oni7qwCZD3veURw7HxpNAj9hR+S5N/pNeZgubQvJWyaPuQDm7PTs1+\ntFGiYNfAsiibX6Rv0wci3M+z2XEVAeR9Vzg6v4qoofDyoTbovn2LztaNEjTkB+oK\ntlvpNhg1zhou0jDVYFniEXvzjckxswHVb8cT0OMTKHALyLPrPOJzVtM9C1ew2Nnc\n3848xLiApMu3NBk0JqfcS3Bo5Y2b1FRVBvdt+2gFoKZix1MnZdAEZ8xQzL/a0YS5\nHd0wj5+EEKHfOd3A75uPa/WQmA+o0cBFfrzm69QDcSJSwGpzWrD1ScH3AK8nWvoj\nv7e9gukK/9yl1b4fQQ00vttwJPSgm9EnfPHLAtgXkRloI27H6/PuLoNvSAMQwuCD\nhQRlyGLPBETKkHeodfLoULjhDi1K2gKJTMhtbnUcAA7nEphkMhPWkBpgFdrH+5z4\nLxy+3ek0cqcI7K68EtrffU8jtUj9LFTUC8dERaIBs7NgQ/LfDbDfGh9g6qVj1hZl\nk9aaIPTm/xsi8v3u+0qaq7KzIBc9s59JOoA8TlpOaYdVgSQhHHLBaahOuAigH+VI\nisbC9vmqsThF2QdDtQt37keuqoda2E6sL7PUvIyVXDRfwX7uMDjlzTxHTymvq2Ck\nhtBqojBnThmjJQFgZXocHG8CAwEAAQ==
+'
+# Alpine APK keys for verification of packages for aarch64.
+readonly ALPINE_KEYS_AARCH64='
+alpine-devel@lists.alpinelinux.org-58199dcc.rsa.pub:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3v8/ye/V/t5xf4JiXLXa\nhWFRozsnmn3hobON20GdmkrzKzO/eUqPOKTpg2GtvBhK30fu5oY5uN2ORiv2Y2ht\neLiZ9HVz3XP8Fm9frha60B7KNu66FO5P2o3i+E+DWTPqqPcCG6t4Znk2BypILcit\nwiPKTsgbBQR2qo/cO01eLLdt6oOzAaF94NH0656kvRewdo6HG4urbO46tCAizvCR\nCA7KGFMyad8WdKkTjxh8YLDLoOCtoZmXmQAiwfRe9pKXRH/XXGop8SYptLqyVVQ+\ntegOD9wRs2tOlgcLx4F/uMzHN7uoho6okBPiifRX+Pf38Vx+ozXh056tjmdZkCaV\naQIDAQAB
+alpine-devel@lists.alpinelinux.org-524d27bb.rsa.pub:MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr8s1q88XpuJWLCZALdKj\nlN8wg2ePB2T9aIcaxryYE/Jkmtu+ZQ5zKq6BT3y/udt5jAsMrhHTwroOjIsF9DeG\ne8Y3vjz+Hh4L8a7hZDaw8jy3CPag47L7nsZFwQOIo2Cl1SnzUc6/owoyjRU7ab0p\niWG5HK8IfiybRbZxnEbNAfT4R53hyI6z5FhyXGS2Ld8zCoU/R4E1P0CUuXKEN4p0\n64dyeUoOLXEWHjgKiU1mElIQj3k/IF02W89gDj285YgwqA49deLUM7QOd53QLnx+\nxrIrPv3A+eyXMFgexNwCKQU9ZdmWa00MjjHlegSGK8Y2NPnRoXhzqSP9T9i2HiXL\nVQIDAQAB
 '
 # List of directories to remove when empty.
 readonly UNNECESSARY_DIRS='
@@ -115,9 +121,10 @@ readonly VIRTUAL_PKG=".make-$PROGNAME"
 
 : ${APK:="apk"}
 : ${APK_OPTS:="--no-progress"}
-: ${APK_TOOLS_URI:="https://gitlab.alpinelinux.org/api/v4/projects/5/packages/generic/v2.12.9/x86_64/apk.static"}
-: ${APK_TOOLS_SHA256:="5176da3d4c41f12a08b82809aca8e7e2e383b7930979651b8958eca219815af5"}
-
+: ${APK_TOOLS_URI_PREAMBLE:="https://gitlab.alpinelinux.org/api/v4/projects/5/packages/generic/v2.12.9"}
+: ${APK_TOOLS_STATIC:="apk.static"}
+: ${APK_TOOLS_AARCH64_SHA256:="0164d47954c8a52e8ed10db1633174974a3b1e4182a1993a5a8343e394ee1bbc"}
+: ${APK_TOOLS_X86_64_SHA256:="5176da3d4c41f12a08b82809aca8e7e2e383b7930979651b8958eca219815af5"}
 
 # Set pipefail if supported.
 if ( set -o pipefail 2>/dev/null ); then
@@ -172,6 +179,10 @@ dump_alpine_keys() {
 	local content file line
 
 	mkdir -p "$dest_dir"
+	case "$ALPINE_ARCH" in
+		"aarch64") ALPINE_KEYS=$ALPINE_KEYS_AARCH64;;
+		"x86_64") ALPINE_KEYS=$ALPINE_KEYS_X86_64;;
+    esac
 	for line in $ALPINE_KEYS; do
 		file=${line%%:*}
 		content=${line#*:}
@@ -257,14 +268,15 @@ write_script() {
 
 #=============================  M a i n  ==============================#
 
-opts=$(getopt -n $PROGNAME -o b:m:Cp:r:s:cd:t:hV \
-	-l branch:,fs-skel-chown:,fs-skel-dir:,keys-dir:,mirror-uri:,no-cleanup,no-default-pkgs,packages:,repositories-file:,script-chroot,temp-dir:,timezone:,help,version \
+opts=$(getopt -n $PROGNAME -o a:b:m:Cp:r:s:cd:t:hV \
+	-l arch:,branch:,fs-skel-chown:,fs-skel-dir:,keys-dir:,mirror-uri:,no-cleanup,no-default-pkgs,packages:,repositories-file:,script-chroot,temp-dir:,timezone:,help,version \
 	-- "$@") || help 1 >&2
 
 eval set -- "$opts"
 while [ $# -gt 0 ]; do
 	n=2
 	case "$1" in
+		-a | --arch) ALPINE_ARCH="$2";;
 		-b | --branch) ALPINE_BRANCH="$2";;
 		-s | --fs-skel-dir) FS_SKEL_DIR="$2";;
 		     --fs-skel-chown) FS_SKEL_CHOWN="$2";;
@@ -293,6 +305,7 @@ SCRIPT=
 [ "$(id -u)" -eq 0 ] || die 'This script must be run as root!'
 [ ! -e "${TEMP_DIR:-}" ] || die "Temp path $TEMP_DIR must not exist!"
 
+: ${ALPINE_ARCH:="x86_64"}
 : ${ALPINE_BRANCH:="latest-stable"}
 : ${ALPINE_MIRROR:="http://dl-cdn.alpinelinux.org/alpine"}
 : ${CLEANUP:="yes"}
@@ -359,8 +372,11 @@ fi
 #-----------------------------------------------------------------------
 if ! command -v "$APK" >/dev/null; then
 	einfo "$APK not found, downloading static apk-tools"
-
-	wgets "$APK_TOOLS_URI" "$APK_TOOLS_SHA256" "$TEMP_DIR"
+	case "$ALPINE_ARCH" in
+		"x86_64") APK_TOOLS_SHA256=$APK_TOOLS_X86_64_SHA256;;
+		"aarch64") APK_TOOLS_SHA256=$APK_TOOLS_AARCH64_SHA256;;
+    esac
+    wgets "$APK_TOOLS_URI_PREAMBLE/$ALPINE_ARCH/$APK_TOOLS_STATIC" "$APK_TOOLS_SHA256" "$TEMP_DIR"
 	APK="$TEMP_DIR/apk.static"
 	chmod +x "$APK"
 fi
