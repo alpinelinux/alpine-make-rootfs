@@ -6,13 +6,18 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        branch:
+          - latest-stable
+          - edge
     steps:
       - uses: actions/checkout@v2
 
       - name: Build rootfs tarball
         run: |
          sudo ./alpine-make-rootfs \
-              --branch v3.15 \
+              --branch ${{ matrix.branch }} \
               --packages 'ruby sqlite' \
               --script-chroot \
               example-$(date +%Y%m%d).tar.gz -- ./example/install.sh
