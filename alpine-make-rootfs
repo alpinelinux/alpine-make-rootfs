@@ -399,6 +399,9 @@ if ! [ -f "$rootfs"/etc/alpine-release ]; then
 	fi
 fi
 
+# Disable root log in without password.
+sed -i 's/^root::/root:*:/' "$rootfs"/etc/shadow
+
 [ -e "$rootfs"/var/run ] || ln -s /run "$rootfs"/var/run
 
 #-----------------------------------------------------------------------
