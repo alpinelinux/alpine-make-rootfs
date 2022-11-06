@@ -217,7 +217,7 @@ setup_timezone() {
 
 # Unmounts all filesystems under the directory tree $1 (must be absolute path).
 umount_recursively() {
-	local mount_point=$(realpath "$1")
+	local mount_point="$(realpath "$1")"
 
 	cat /proc/mounts \
 		| cut -d ' ' -f 2 \
