@@ -149,7 +149,7 @@ cleanup() {
 	set +eu
 	trap '' EXIT HUP INT TERM  # unset trap to avoid loop
 
-	if [ "$INSTALL_HOST_PKGS" = yes ]; then
+	if [ "$INSTALL_HOST_PKGS" = yes ] && _apk info --quiet --installed $VIRTUAL_PKG; then
 		_apk del $VIRTUAL_PKG >&2
 	fi
 	if [ -d "$TEMP_DIR" ]; then
