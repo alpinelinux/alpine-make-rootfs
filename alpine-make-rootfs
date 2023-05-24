@@ -319,11 +319,8 @@ case "$ROOTFS_DEST" in
 esac
 [ -z "$FS_SKEL_DIR" ] || host_pkgs="$host_pkgs rsync"
 
-rootfs_pkgs="$PACKAGES"
-if [ "$DEFAULT_PKGS" = 'yes' ]; then
-	rootfs_pkgs="$ALPINE_BASE_PKGS $rootfs_pkgs"
-fi
-[ "$rootfs_pkgs" ] || die 'No packages specified to be installed!'
+[ "$PACKAGES" ] || [ "$DEFAULT_PKGS" = 'yes' ] || \
+	die 'No packages specified to be installed!'
 
 rootfs="$ROOTFS_DEST"
 if [ "$ROOTFS_DEST" = '-' ]; then
@@ -384,7 +381,10 @@ else
 	dump_alpine_keys "$rootfs"/etc/apk/keys/
 fi
 
-_apk add --root "$rootfs" --update-cache --initdb $rootfs_pkgs >&2
+if [ "$DEFAULT_PKGS" = 'yes' ]; then
+	_apk add --root "$rootfs" --initdb $ALPINE_BASE_PKGS >&2
+fi
+_apk add --root "$rootfs" --initdb $PACKAGES >&2
 
 if ! [ -f "$rootfs"/etc/alpine-release ]; then
 	if _apk info --root "$rootfs" --quiet alpine-release >/dev/null; then
