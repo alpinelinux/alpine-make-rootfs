@@ -14,10 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build rootfs tarball
+      - name: Build rootfs tarball using script from file
         run: |
-         sudo ./alpine-make-rootfs \
+          sudo ./alpine-make-rootfs \
               --branch ${{ matrix.branch }} \
               --packages 'ruby sqlite' \
               --script-chroot \
               example-$(date +%Y%m%d).tar.gz -- ./example/install.sh
+
+      - name: Build rootfs using script from stdin
+        run: |
+          cd example
+          sudo ../alpine-make-rootfs \
+              --branch ${{ matrix.branch }} \
+              --packages 'ruby sqlite' \
+              --script-chroot \
+              rootfs - < install.sh
