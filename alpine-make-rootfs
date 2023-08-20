@@ -54,10 +54,11 @@
 #                                         If not specified, a repositories file will be created with
 #                                         Alpine's main and community repositories on --mirror-uri.
 #
-#   -c --script-chroot (SCRIPT_CHROOT)    Bind <script>'s directory at /mnt inside the rootfs dir
-#                                         and chroot into the rootfs before executing <script>.
-#                                         Otherwise <script> is executed in the current directory
-#                                         and $ROOTFS variable points to the rootfs directory.
+#   -c --script-chroot (SCRIPT_CHROOT)    Bind <script>'s directory (or CWD if read from STDIN) at
+#                                         /mnt inside the rootfs dir and chroot into the rootfs
+#                                         before executing <script>. Otherwise <script> is executed
+#                                         in the current directory and $ROOTFS variable points to
+#                                         the rootfs directory.
 #
 #   -d --temp-dir TEMP_DIR                Path where to create a temporary directory; used for
 #                                         downloading apk-tools when not available on the host
@@ -330,12 +331,13 @@ elif [ "$tar_opts" ]; then
 	rootfs="${rootfs%.tar}"
 fi
 
+script_file="$SCRIPT"
 if [ "$SCRIPT" = '-' ]; then
-	SCRIPT="$TEMP_DIR/setup.sh"
-	write_script "$SCRIPT"
+	script_file="$TEMP_DIR/.setup.sh"
+	write_script "$script_file"
 fi
-if [ "$SCRIPT" ]; then
-	SCRIPT=$(realpath "$SCRIPT")
+if [ "$script_file" ]; then
+	script_file=$(realpath "$script_file")
 fi
 
 if [ -f /etc/alpine-release ]; then
@@ -424,22 +426,36 @@ fi
 
 #-----------------------------------------------------------------------
 if [ "$SCRIPT" ]; then
-	script_name="${SCRIPT##*/}"
+	script_name="${script_file##*/}"
 
 	if [ "$SCRIPT_CHROOT" = 'no' ]; then
 		einfo "Executing script: $script_name $*"
 
-		ROOTFS="$rootfs" "$SCRIPT" "$@" >&2 || die 'Script failed'
+		ROOTFS="$rootfs" "$script_file" "$@" >&2 || die 'Script failed'
 	else
-		einfo "Executing script in chroot: $script_name $*"
+		einfo 'Preparing chroot'
 
 		_apk add --root "$rootfs" -t "$VIRTUAL_PKG" apk-tools >&2
-
 		prepare_chroot "$rootfs"
-		mount_bind "$(dirname "$SCRIPT")" "$rootfs"/mnt
+
+		if [ "$SCRIPT" = '-' ]; then
+			cp "$script_file" "$rootfs/$script_name"
+			bind_dir="$(pwd)"
+			script_file2="/$script_name"
+		else
+			bind_dir="$(dirname "$script_file")"
+			script_file2="./$script_name"
+		fi
+		echo "Mounting $bind_dir to /mnt inside chroot" >&2
+		mount_bind "$bind_dir" "$rootfs"/mnt
+
+		einfo "Executing script in chroot: $script_name $*"
+
 		chroot "$rootfs" \
-			/bin/sh -c "cd /mnt && ./$script_name \"\$@\"" -- "$@" >&2 \
+			/bin/sh -c "cd /mnt && $script_file2 \"\$@\"" -- "$@" >&2 \
 			|| die 'Script failed'
+
+		[ "$SCRIPT" = '-' ] && rm -f "$rootfs/$script_name"
 		umount_recursively "$rootfs"
 	fi
 fi
