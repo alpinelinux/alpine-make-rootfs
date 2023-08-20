@@ -1,5 +1,5 @@
 #!/bin/sh
-# vim: set ts=4:
+# vim: set ts=4 sw=4:
 #---help---
 # Usage: alpine-make-rootfs [options] [--] <dest> [<script> [<script-opts...>]]
 #
