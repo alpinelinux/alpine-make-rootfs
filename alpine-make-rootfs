@@ -436,7 +436,7 @@ if [ "$SCRIPT" ]; then
 		_apk add --root "$rootfs" -t "$VIRTUAL_PKG" apk-tools >&2
 
 		prepare_chroot "$rootfs"
-		mount_bind "${SCRIPT%/*}" "$rootfs"/mnt
+		mount_bind "$(dirname "$SCRIPT")" "$rootfs"/mnt
 		chroot "$rootfs" \
 			/bin/sh -c "cd /mnt && ./$script_name \"\$@\"" -- "$@" >&2 \
 			|| die 'Script failed'
