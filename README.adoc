@@ -9,7 +9,7 @@ image:https://github.com/{gh-name}/workflows/CI/badge.svg["Build Status", link="
 endif::env-github[]
 
 This project provides a script for building customized https://alpinelinux.org/[Alpine Linux] rootfs (a base image if you like) for containers.
-It’s quite simple (250 LoC of shell), fast and requires minimum dependencies (just common Linux tools).
+It’s quite simple (300 LoC of shell), fast and requires minimum dependencies (just common Linux tools).
 
 TIP: Do you want to just quickly chroot into Alpine Linux, e.g. on CI?
      Check out https://github.com/alpinelinux/alpine-chroot-install[alpine-chroot-install]!
