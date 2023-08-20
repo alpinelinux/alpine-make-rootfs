@@ -51,9 +51,8 @@
 #   -p --packages PACKAGES                Additional packages to install into the rootfs.
 #
 #   -r --repositories-file REPOS_FILE     Path of repositories file to copy into the rootfs.
-#                                         Default is /etc/apk/repositories. If does not exist,
-#                                         repositories file with Alpine's main and community
-#                                         repositories on --mirror-uri is created.
+#                                         If not specified, a repositories file will be created with
+#                                         Alpine's main and community repositories on --mirror-uri.
 #
 #   -c --script-chroot (SCRIPT_CHROOT)    Bind <script>'s directory at /mnt inside the rootfs dir
 #                                         and chroot into the rootfs before executing <script>.
@@ -301,7 +300,7 @@ SCRIPT=
 : ${FS_SKEL_DIR:=}
 : ${KEYS_DIR:="/etc/apk/keys"}
 : ${PACKAGES:=}
-: ${REPOS_FILE:="/etc/apk/repositories"}
+: ${REPOS_FILE:=}
 : ${SCRIPT_CHROOT:="no"}
 : ${TEMP_DIR:="$(mktemp -d /tmp/$PROGNAME.XXXXXX)"}
 : ${TIMEZONE:=}
