@@ -92,7 +92,7 @@
 set -eu
 
 readonly PROGNAME='alpine-make-rootfs'
-readonly VERSION='0.7.0'
+readonly VERSION='0.7.1'
 
 # Base Alpine packages to install in rootfs.
 readonly ALPINE_BASE_PKGS='alpine-baselayout busybox busybox-suid musl-utils'
