@@ -63,7 +63,7 @@
 #   -d --temp-dir TEMP_DIR                Path where to create a temporary directory; used for
 #                                         downloading apk-tools when not available on the host
 #                                         sytem or for rootfs when <dest> is "-" (i.e. STDOUT).
-#                                         This path must not exist! Defaults to using `mkdir -d`.
+#                                         This path must not exist! Defaults to using `mktemp -d`.
 #
 #   -t --timezone TIMEZONE                Timezone to set (e.g. Europe/Prague). Default is to leave
 #                                         timezone UTC.
