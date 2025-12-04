@@ -11,6 +11,7 @@ jobs:
         branch:
           - latest-stable
           - edge
+          - v3.8  # some old branch
     steps:
       - uses: actions/checkout@v4
 
