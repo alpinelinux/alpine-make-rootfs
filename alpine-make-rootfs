@@ -226,15 +226,24 @@ umount_recursively() {
 		| xargs -r -n 1 umount
 }
 
-# Downloads the specified file using wget and checks checksum.
-wgets() (
+# Downloads the specified file using wget/curl and checks checksum.
+download() (
 	local url="$1"
 	local sha256="$2"
 	local dest="${3:-.}"
 
-	cd "$dest" \
-		&& wget -T 10 --no-verbose "$url" \
-		&& echo "$sha256  ${url##*/}" | sha256sum -c
+	if [ -x "$(command -v wget)" ] ; then
+		cd "$dest" \
+			&& wget -T 10 --no-verbose "$url" \
+			&& echo "$sha256  ${url##*/}" | sha256sum -c
+	elif [ -x "$(command -v curl)" ] ; then
+		cd "$dest" \
+			&& curl -LO --max-time 10 --no-verbose "$url" \
+			&& echo "$sha256  ${url##*/}" | sha256sum -c
+	else
+		echo "ERROR: requires wget or curl to download files." >&2
+		exit 1
+	fi
 )
 
 # Writes STDIN into file $1 and sets it executable bit. If the content does not
@@ -361,7 +370,7 @@ fi
 if ! command -v "$APK" >/dev/null; then
 	einfo "$APK not found, downloading static apk-tools"
 
-	wgets "$APK_TOOLS_URI" "$APK_TOOLS_SHA256" "$TEMP_DIR"
+	download "$APK_TOOLS_URI" "$APK_TOOLS_SHA256" "$TEMP_DIR"
 	APK="$TEMP_DIR/apk.static"
 	chmod +x "$APK"
 fi
